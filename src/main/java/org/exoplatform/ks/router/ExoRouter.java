@@ -16,6 +16,8 @@
  */
 package org.exoplatform.ks.router;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -24,12 +26,15 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import jregex.Matcher;
 import jregex.Pattern;
+import jregex.REFlags;
 
 /**
- * Created by The eXo Platform SAS Author 
- * : eXoPlatform exo@exoplatform.com Apr 23, 2012
+ * Created by The eXo Platform SAS Author : eXoPlatform exo@exoplatform.com Apr
+ * 23, 2012
  */
 public class ExoRouter {
+
+  static Pattern routePattern = new Pattern("^({path}.*/[^\\s]*)\\s+({action}[^\\s(]+)({params}.+)?(\\s*)$");
 
   /**
    * All the loaded routes.
@@ -113,11 +118,144 @@ public class ExoRouter {
     return null;
   }
 
+  /**
+   * Generates Action base on the action name and arguments
+   * 
+   * @param action
+   * @param args
+   * @return
+   */
+  public static ActionBuilder reverse(String action, Map<String, Object> args) {
+    Map<String, Object> argsbackup = new HashMap<String, Object>(args);
+    // Add routeArgs
+    for (Route route : routes) {
+      if (route.actionPattern != null) {
+        Matcher matcher = route.actionPattern.matcher(action);
+        if (matcher.matches()) {
+          for (String group : route.actionArgs) {
+            String v = matcher.group(group);
+            if (v == null) {
+              continue;
+            }
+            args.put(group, v.toLowerCase());
+          }
+          List<String> inPathArgs = new ArrayList<String>(16);
+          boolean allRequiredArgsAreHere = true;
+
+          for (Route.Arg arg : route.args) {
+            inPathArgs.add(arg.name);
+            Object value = args.get(arg.name);
+            if (value != null) {
+              if (!value.toString().startsWith(":") && !arg.constraint.matches(value.toString())) {
+                allRequiredArgsAreHere = false;
+                break;
+              }
+            }
+          }
+          if (allRequiredArgsAreHere) {
+            StringBuilder queryString = new StringBuilder();
+            String path = route.path;
+            if (path.endsWith("/?")) {
+              path = path.substring(0, path.length() - 2);
+            }
+            for (Map.Entry<String, Object> entry : args.entrySet()) {
+              String key = entry.getKey();
+              Object value = entry.getValue();
+              if (inPathArgs.contains(key) && value != null) {
+                path = path.replaceAll("\\{(<[^>]+>)?" + key + "\\}", value.toString().replace("$", "\\$").replace("%3A", ":").replace("%40", "@"));
+              } else if (value != null) {
+                try {
+                  queryString.append(URLEncoder.encode(key, "UTF-8"));
+                  queryString.append("=");
+                  if (value.toString().startsWith(":")) {
+                    queryString.append(value.toString());
+                  } else {
+                    queryString.append(URLEncoder.encode(value.toString() + "", "UTF-8"));
+                  }
+                  queryString.append("&");
+                } catch (UnsupportedEncodingException ex) {
+                }
+
+              }
+            }
+            String qs = queryString.toString();
+            if (qs.endsWith("&")) {
+              qs = qs.substring(0, qs.length() - 1);
+            }
+            ActionBuilder actionDefinition = new ActionBuilder();
+            actionDefinition.url = qs.length() == 0 ? path : path + "?" + qs;
+            actionDefinition.action = action;
+            actionDefinition.args = argsbackup;
+            return actionDefinition;
+          }
+        }
+      }
+    }
+    return null;
+  }
+
+  public static class ActionBuilder {
+
+    /**
+     * The domain/host name.
+     */
+    public String host;
+
+    /**
+     * The HTTP method, e.g. "GET".
+     */
+    public String method;
+
+    /**
+     * @todo - what is this? does it include the domain?
+     */
+    public String url;
+
+    /**
+     * Whether the route contains an astericks *.
+     */
+    public boolean star;
+
+    /**
+     * @todo - what is this? does it include the class and package?
+     */
+    public String action;
+
+    /**
+     * @todo - are these the required args in the routing file, or the query
+     *       string in a request?
+     */
+    public Map<String, Object> args;
+
+    public ActionBuilder add(String key, Object value) {
+      args.put(key, value);
+      return reverse(action, args);
+    }
+
+    public ActionBuilder remove(String key) {
+      args.remove(key);
+      return reverse(action, args);
+    }
+
+    public ActionBuilder addRef(String fragment) {
+      url += "#" + fragment;
+      return this;
+    }
+
+    @Override
+    public String toString() {
+      return url;
+    }
+
+  }
+
   public static class Route {
 
     public String path;
 
     public String action;
+
+    Pattern actionPattern;
 
     List<String> actionArgs = new ArrayList<String>(3);
 
@@ -127,9 +265,9 @@ public class ExoRouter {
 
     List<Arg> args = new ArrayList<Arg>(3);
 
-    Map<String, String> staticArgs         = new HashMap<String, String>(3);
+    Map<String, String> staticArgs = new HashMap<String, String>(3);
 
-    Map<String, String> localArgs          = null;
+    Map<String, String> localArgs = null;
 
     public int routesFileLine;
 
@@ -155,6 +293,13 @@ public class ExoRouter {
       // Action pattern
       patternString = action;
       patternString = patternString.replace(".", "[.]");
+      for (Arg arg : args) {
+        if (patternString.contains("{" + arg.name + "}")) {
+          patternString = patternString.replace("{" + arg.name + "}", "({" + arg.name + "}" + arg.constraint.toString() + ")");
+          actionArgs.add(arg.name);
+        }
+      }
+      actionPattern = new Pattern(patternString, REFlags.IGNORE_CASE);
     }
 
     public void addParams(String params) {
@@ -184,15 +329,16 @@ public class ExoRouter {
         }
         return localArgs;
       }
+
       return null;
     }
 
     static class Arg {
-      String  name;
-      Pattern constraint;
-      String  defaultValue;
+      String name;
 
-      Boolean optional = false;
+      Pattern constraint;
+
+      String defaultValue;
     }
   }
 
