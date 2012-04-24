@@ -82,31 +82,34 @@ By default, it will run only unit tests.
 Sample code:
  * Router configuration
 
-    //{selectedNode}/ForumService
-    ExoRouter.prependRoute("/{pageID}/ForumService", "forum.home");
-    //{selectedNode}/SearchForum
-    ExoRouter.addRoute("/{pageID}/SearchForum", "forum.search");
-    //{selectedNode}Tag
-    ExoRouter.addRoute("/{pageID}/Tag", "forum.tag");
-    //{selectedNode}/topic/{topicId}
-    ExoRouter.addRoute("/{pageID}/topic/{topicID}", "forum.topic.show");
-    //{selectedNode}/topic/topic{topicId}/true
-    ExoRouter.addRoute("/{pageID}/topic/{topicID}/reply", "forum.topic.reply");
-    //{selectedNode}/topic/{topicId}/false
-    ExoRouter.addRoute("/{pageID}/topic/{topicID}/quote", "forum.topic.quote");
-    //{selectedNode}/topic/{topicID}/{postID}
-    ExoRouter.addRoute("/{pageID}/topic/{topicID}/post/{postID}", "forum.topic.post.show");
-    //{selectedNode}/topic/topic{topicID}/
-    ExoRouter.addRoute("/{pageID}/topic/{topicID}/page/{pageNo}", "forum.topic.page");
-    //{selectedNode}/forum/forum{forumID}
-    ExoRouter.addRoute("/{pageID}/forum/{forumID}", "forum.show");
-    //{selectNode}/forum/{forumID}/{number}
-    ExoRouter.addRoute("/{pageID}/forum/{forumID}/page/{pageNo}", "forum.show.page");
+        //{selectedNode}/ForumService
+        ExoRouter.prependRoute("/{pageID}/ForumService", "forum.home");
+        //{selectedNode}/SearchForum
+        ExoRouter.addRoute("/{pageID}/SearchForum", "forum.search");
+        //{selectedNode}Tag
+        ExoRouter.addRoute("/{pageID}/Tag", "forum.tag");
+        //{selectedNode}/topic/{topicId}
+        ExoRouter.addRoute("/{pageID}/topic/{topicID}", "forum.topic.show");
+        //{selectedNode}/topic/topic{topicId}/true
+        ExoRouter.addRoute("/{pageID}/topic/{topicID}/reply", "forum.topic.reply");
+        //{selectedNode}/topic/{topicId}/false
+        ExoRouter.addRoute("/{pageID}/topic/{topicID}/quote", "forum.topic.quote");
+        //{selectedNode}/topic/{topicID}/{postID}
+        ExoRouter.addRoute("/{pageID}/topic/{topicID}/post/{postID}", "forum.topic.post.show");
+        //{selectedNode}/topic/topic{topicID}/
+        ExoRouter.addRoute("/{pageID}/topic/{topicID}/page/{pageNo}", "forum.topic.page");
+        //{selectedNode}/forum/forum{forumID}
+        ExoRouter.addRoute("/{pageID}/forum/{forumID}", "forum.show");
+        //{selectNode}/forum/{forumID}/{number}
+        ExoRouter.addRoute("/{pageID}/forum/{forumID}/page/{pageNo}", "forum.show.page");
 
-  * Gets Route from path like that: forum's path= "/12345/ForumService");"
-    + Route route = ExoRouter.route("/12345/ForumService");
-    + route.action is "forum.home"
-    + pageID is "12345"
+ * Gets Route from path like that:
+
+        forum's path= "/12345/ForumService");"
+        Route route = ExoRouter.route("/12345/ForumService");
+        route.action is "forum.home"
+        pageID is "12345"
+        
    Base on these got data, it's easier to map with forum's handler.
 
 
