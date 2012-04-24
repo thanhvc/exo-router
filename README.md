@@ -4,11 +4,11 @@
   * Currently, we are handling with complexity condition(See more detail in https://github.com/exodev/ks/blob/master/eXoApplication/forum/webapp/src/main/java/org/exoplatform/forum/webui/UIForumPortlet.java#calculateRenderComponent method), so totally difficult to maintainance if you have any change with forum's URI.
 
 <table>
-  <td>
+  <tr>
     <td>No</td>
     <td>URI path</td>
     <td>Comment</td>
-  </td>
+  </tr>
   <tr>
     <td>1</td>
     <td>{selectNode}/ForumService</td>
