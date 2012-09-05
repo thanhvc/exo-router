@@ -23,18 +23,19 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
-
 import java.util.regex.Pattern;
-import net.phuonglm.regex.NamedMatcherImpl;
-import net.phuonglm.regex.NamedPattern;
+
+import org.exoplatform.ks.router.regex.ExoMatcher;
+import org.exoplatform.ks.router.regex.ExoPattern;
+
 
 /**
- * Created by The eXo Platform SAS Author : eXoPlatform exo@exoplatform.com Apr
- * 23, 2012
+ * Created by The eXo Platform SAS Author : eXoPlatform thanhvc@exoplatform.com 
+ * Apr, 23, 2012
  */
 public class ExoRouter {
 
-  static NamedPattern defaultRoutePattern = NamedPattern.compile("^({path}.*/[^\\s]*)\\s+({action}[^\\s(]+)({params}.+)?(\\s*)$");
+  static ExoPattern defaultRoutePattern = ExoPattern.compile("^({path}.*/[^\\s]*)\\s+({action}[^\\s(]+)({params}.+)?(\\s*)$");
 
   /**
    * All the loaded routes.
@@ -119,8 +120,9 @@ public class ExoRouter {
   }
 
   /**
-   * Generates Action base on the action name and arguments
-   * 
+   * Generates ActionBuilder base on the action name and arguments list.
+   * Example: invokes reverse("show.topic", new HashMap<String, Object>{topicId, "topicId321"}) method. 
+   *           
    * @param action
    * @param args
    * @return
@@ -130,7 +132,7 @@ public class ExoRouter {
     // Add routeArgs
     for (Route route : routes) {
       if (route.actionPattern != null) {
-        NamedMatcherImpl matcher = route.actionPattern.matcher(action);
+        ExoMatcher matcher = route.actionPattern.matcher(action);
         if (matcher.matches()) {
           for (String group : route.actionArgs) {
             String v = matcher.group(group);
@@ -255,11 +257,11 @@ public class ExoRouter {
 
     public String action;
 
-    NamedPattern actionPattern;
+    ExoPattern actionPattern;
 
     List<String> actionArgs = new ArrayList<String>(3);
 
-    NamedPattern pattern;
+    ExoPattern pattern;
 
     public String routesFile;
 
@@ -271,25 +273,25 @@ public class ExoRouter {
 
     public int routesFileLine;
 
-    static NamedPattern customRegexPattern =  NamedPattern.compile("\\{([a-zA-Z_][a-zA-Z_0-9]*)\\}");
+    static ExoPattern customRegexPattern =  ExoPattern.compile("\\{([a-zA-Z_][a-zA-Z_0-9]*)\\}");
 
-    static NamedPattern argsPattern = NamedPattern.compile("\\{<([^>]+)>([a-zA-Z_0-9]+)\\}");
+    static ExoPattern argsPattern = ExoPattern.compile("\\{<([^>]+)>([a-zA-Z_0-9]+)\\}");
 
-    static NamedPattern paramPattern = NamedPattern.compile("([a-zA-Z_0-9]+):'(.*)'");
+    static ExoPattern paramPattern = ExoPattern.compile("([a-zA-Z_0-9]+):'(.*)'");
 
     public void compute() {
       String patternString = this.path;
       patternString = customRegexPattern.matcher(patternString).replaceAll("\\{<[^/]+>$1\\}");
-      NamedMatcherImpl matcher = argsPattern.matcher(patternString);
+      ExoMatcher matcher = argsPattern.matcher(patternString);
       while (matcher.find()) {
         Arg arg = new Arg();
         arg.name = matcher.group(2);
-        arg.constraint = NamedPattern.compile(matcher.group(1));
+        arg.constraint = ExoPattern.compile(matcher.group(1));
         args.add(arg);
       }
 
       patternString = argsPattern.matcher(patternString).replaceAll("({$2}$1)");
-      this.pattern = NamedPattern.compile(patternString);
+      this.pattern = ExoPattern.compile(patternString);
       // Action pattern
       patternString = action;
       patternString = patternString.replace(".", "[.]");
@@ -299,7 +301,7 @@ public class ExoRouter {
           actionArgs.add(arg.name);
         }
       }
-      actionPattern = NamedPattern.compile(patternString, Pattern.CASE_INSENSITIVE);
+      actionPattern = ExoPattern.compile(patternString, Pattern.CASE_INSENSITIVE);
     }
 
     public void addParams(String params) {
@@ -308,7 +310,7 @@ public class ExoRouter {
       }
       params = params.substring(1, params.length() - 1);
       for (String param : params.split(",")) {
-        NamedMatcherImpl matcher = paramPattern.matcher(param);
+        ExoMatcher matcher = paramPattern.matcher(param);
         if (matcher.matches()) {
           staticArgs.put(matcher.group(1), matcher.group(2));
         } else {
@@ -318,7 +320,7 @@ public class ExoRouter {
     }
 
     public Map<String, String> matches(String path) {
-      NamedMatcherImpl matcher = pattern.matcher(path);
+      ExoMatcher matcher = pattern.matcher(path);
       // Extract the host variable
       if (matcher.matches()) {
         Map<String, String> localArgs = new HashMap<String, String>();
@@ -336,7 +338,7 @@ public class ExoRouter {
     static class Arg {
       String name;
 
-      NamedPattern constraint;
+      ExoPattern constraint;
 
       String defaultValue;
     }

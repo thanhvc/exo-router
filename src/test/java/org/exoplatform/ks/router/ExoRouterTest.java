@@ -1,8 +1,7 @@
 package org.exoplatform.ks.router;
 
-import junit.framework.TestCase;
+import java.util.HashMap;
 
-import org.exoplatform.ks.router.ExoRouter;
 import org.exoplatform.ks.router.ExoRouter.Route;
 
 /*
@@ -28,88 +27,87 @@ import org.exoplatform.ks.router.ExoRouter.Route;
  *          exo@exoplatform.com
  * Apr 23, 2012  
  */
-public class ExoRouterTest extends TestCase {
+public class ExoRouterTest extends ExoRouterBaseTest {
+  
   @Override
   protected void setUp() throws Exception {
     super.setUp();
-    initRouter();
   }
   
   @Override
   protected void tearDown() throws Exception {
     super.tearDown();
-    ExoRouter.reset();
   }
   
-  private void initRouter() {
-    //{selectedNode}/ForumService
-    ExoRouter.prependRoute("/{pageID}/ForumService", "forum.home");
-    //{selectedNode}/SearchForum
-    ExoRouter.addRoute("/{pageID}/SearchForum", "forum.search");
-    //{selectedNode}Tag
-    ExoRouter.addRoute("/{pageID}/Tag", "forum.tag");
-    //{selectedNode}/topic/{topicId}
-    ExoRouter.addRoute("/{pageID}/topic/{topicID}", "forum.topic.show");
-    //{selectedNode}/topic/topic{topicId}/true
-    ExoRouter.addRoute("/{pageID}/topic/{topicID}/reply", "forum.topic.reply");
-    //{selectedNode}/topic/{topicId}/false
-    ExoRouter.addRoute("/{pageID}/topic/{topicID}/quote", "forum.topic.quote");
-    //{selectedNode}/topic/{topicID}/{postID}
-    ExoRouter.addRoute("/{pageID}/topic/{topicID}/post/{postID}", "forum.topic.post.show");
-    //{selectedNode}/topic/topic{topicID}/
-    ExoRouter.addRoute("/{pageID}/topic/{topicID}/page/{pageNo}", "forum.topic.page");
-    //{selectedNode}/forum/forum{forumID}
-    ExoRouter.addRoute("/{pageID}/forum/{forumID}", "forum.show");
-    //{selectNode}/forum/{forumID}/{number}
-    ExoRouter.addRoute("/{pageID}/forum/{forumID}/page/{pageNo}", "forum.show.page");
+  public void testRouterForActivityShow() throws Exception {
+    Route route = ExoRouter.route("/activity/4437hg2121");
+    
+    assertRouter(route, "activity.show", new HashMap<String,String>(){{
+      put("activityID","4437hg2121");
+    }});
+    
   }
-  
   
   public void testRouterForForumHome() throws Exception {
     Route route = ExoRouter.route("/12345/ForumService");
-    assertNotNull(route);
-    assertEquals("forum.home", route.action);
-    assertEquals("12345", route.localArgs.get("pageID"));
+    
+    assertRouter(route, "forum.home", new HashMap<String,String>(){{
+      put("pageID","12345");
+    }});
   }
   
   public void testRouterForSearch() throws Exception {
     Route route = ExoRouter.route("/12345/SearchForum");
-    assertNotNull(route);
-    assertEquals("forum.search", route.action);
-    assertEquals("12345", route.localArgs.get("pageID"));
+    
+    //
+    assertRouter(route, "forum.search", new HashMap<String,String>(){{
+      put("pageID","12345");
+    }});
+    
   }
   
   public void testRouterForTag() throws Exception {
     Route route = ExoRouter.route("/12345/Tag");
-    assertNotNull(route);
-    assertEquals("forum.tag", route.action);
-    assertEquals("12345", route.localArgs.get("pageID"));
+    
+    //
+    assertRouter(route, "forum.tag", new HashMap<String,String>(){{
+      put("pageID","12345");
+    }});
   }
   
   public void testRouterForShowTopic() throws Exception {
     Route route = ExoRouter.route("/12345/topic/topic987654321");
-    assertNotNull(route);
-    assertEquals("forum.topic.show", route.action);
-    assertEquals("12345", route.localArgs.get("pageID"));
-    assertEquals("topic987654321", route.localArgs.get("topicID"));
+    
+    //
+    assertRouter(route, "forum.topic.show", new HashMap<String,String>(){{
+      put("pageID","12345");
+      put("topicID","topic987654321");
+    }});
   }
   
   public void testRouterForShowTopicTrue() throws Exception {
     //ExoRouter.addRoute("/{pageID}/topic/{topicID}/{reply}", "forum.tag.show.true");
     Route route = ExoRouter.route("/12345/topic/topic987654321/reply");
-    assertNotNull(route);
-    assertEquals("forum.topic.reply", route.action);
-    assertEquals("12345", route.localArgs.get("pageID"));
-    assertEquals("topic987654321", route.localArgs.get("topicID"));
+    
+    //
+    assertRouter(route, "forum.topic.reply", new HashMap<String,String>(){{
+      put("pageID","12345");
+      put("topicID","topic987654321");
+    }});
+    
   }
   
   public void testRouterForShowTopicFalse() throws Exception {
     //ExoRouter.addRoute("/{pageID}/topic/{topicID}/{reply}", "forum.tag.show.true");
     Route route = ExoRouter.route("/12345/topic/topic987654321/quote");
-    assertNotNull(route);
-    assertEquals("forum.topic.quote", route.action);
-    assertEquals("12345", route.localArgs.get("pageID"));
-    assertEquals("topic987654321", route.localArgs.get("topicID"));
+    
+    //
+    assertRouter(route, "forum.topic.quote", new HashMap<String,String>(){
+
+    {
+      put("pageID","12345");
+      put("topicID","topic987654321");
+    }});
   }
   
   public void testRouterForShowTopicWrong() throws Exception {
@@ -121,11 +119,13 @@ public class ExoRouterTest extends TestCase {
   public void testRouterForShowTopicPage() throws Exception {
     //ExoRouter.addRoute("/{pageID}/topic/{topicID}/{[0-9]}", "forum.topic.page");
     Route route = ExoRouter.route("/12345/topic/topic987654321/page/3");
-    assertNotNull(route);
-    assertEquals("forum.topic.page", route.action);
-    assertEquals("12345", route.localArgs.get("pageID"));
-    assertEquals("topic987654321", route.localArgs.get("topicID"));
-    assertEquals("3", route.localArgs.get("pageNo"));
+    
+    //
+    assertRouter(route, "forum.topic.page", new HashMap<String,String>(){{
+      put("pageID","12345");
+      put("topicID","topic987654321");
+      put("pageNo","3");
+    }});
   }
 
 }

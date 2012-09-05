@@ -13,16 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package net.phuonglm.regex;
+package org.exoplatform.ks.router.regex;
 
 import java.util.regex.Matcher;
 
-public class NamedMatcherImpl implements NamedMatcher {
+public class ExoMatcherImpl implements ExoMatcher {
 
 	private Matcher matcher;
-	private NamedPattern parentPattern;
+	private ExoPattern parentPattern;
 
-	NamedMatcherImpl(NamedPattern parentPattern, CharSequence input) {
+	ExoMatcherImpl(ExoPattern parentPattern, CharSequence input) {
 		this.parentPattern = parentPattern;
 		this.matcher = parentPattern.pattern().matcher(input);
 	}

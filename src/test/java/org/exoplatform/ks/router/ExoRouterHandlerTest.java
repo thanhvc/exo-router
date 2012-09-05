@@ -1,14 +1,8 @@
 package org.exoplatform.ks.router;
 
-import junit.framework.TestCase;
-
-import org.exoplatform.ks.router.ExoRouter;
 import org.exoplatform.ks.router.ExoRouter.Route;
 import org.exoplatform.ks.router.event.BaseEvent;
-import org.exoplatform.ks.router.event.HandleException;
-import org.exoplatform.ks.router.impl.handler.BaseEventHandler;
 import org.exoplatform.ks.router.impl.handler.ForumEvent;
-import org.exoplatform.ks.router.impl.handler.HandlerFactory;
 
 /*
  * Copyright (C) 2003-2012 eXo Platform SAS.
@@ -33,52 +27,17 @@ import org.exoplatform.ks.router.impl.handler.HandlerFactory;
  *          exo@exoplatform.com
  * Apr 23, 2012  
  */
-public class ExoRouterHandlerTest extends TestCase {
+public class ExoRouterHandlerTest extends ExoRouterBaseTest {
   @Override
   protected void setUp() throws Exception {
     super.setUp();
-    initRouter();
   }
   
   @Override
   protected void tearDown() throws Exception {
     super.tearDown();
-    ExoRouter.reset();
   }
-  
-  private void initRouter() {
-    //{selectedNode}/ForumService
-    ExoRouter.prependRoute("/{pageID}/ForumService", "forum.home");
-    //{selectedNode}/SearchForum
-    ExoRouter.addRoute("/{pageID}/SearchForum", "forum.search");
-    //{selectedNode}Tag
-    ExoRouter.addRoute("/{pageID}/Tag", "forum.tag");
-    //{selectedNode}/topic/{topicId}
-    ExoRouter.addRoute("/{pageID}/topic/{topicID}", "forum.topic.show");
-    //{selectedNode}/topic/topic{topicId}/true
-    ExoRouter.addRoute("/{pageID}/topic/{topicID}/reply", "forum.topic.reply");
-    //{selectedNode}/topic/{topicId}/false
-    ExoRouter.addRoute("/{pageID}/topic/{topicID}/quote", "forum.topic.quote");
-    //{selectedNode}/topic/{topicID}/{postID}
-    ExoRouter.addRoute("/{pageID}/topic/{topicID}/post/{postID}", "forum.topic.post.show");
-    //{selectedNode}/topic/topic{topicID}/
-    ExoRouter.addRoute("/{pageID}/topic/{topicID}/page/{pageNo}", "forum.topic.page");
-    //{selectedNode}/forum/forum{forumID}
-    ExoRouter.addRoute("/{pageID}/forum/{forumID}", "forum.show");
-    //{selectNode}/forum/{forumID}/{number}
-    ExoRouter.addRoute("/{pageID}/forum/{forumID}/page/{pageNo}", "forum.show.page");
-    
-    //{selectNode}/category/{categoryID}
-    ExoRouter.addRoute("/{pageID}/category/{categoryID}", "category.show");
-  }
-  
-  private void doExecute(BaseEvent event) throws HandleException {
-    //
-    BaseEventHandler handler = HandlerFactory.getHandler(event);
-    assertNotNull(handler);
-    handler.handle(event);
-  }
-  
+ 
   public void testRouterHandlerForForumHome() throws Exception {
     Route route = ExoRouter.route("/12345/ForumService");
     assertNotNull(route);

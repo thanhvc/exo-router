@@ -152,9 +152,13 @@ public class RegexTest extends TestCase {
       patternStr = patternStr.replace("{" + arg + "}", "\\{" + arg + "<[^/]+>\\}");
     }
  
-    Pattern patternNew = Pattern.compile(patternArg);
+   
     assertEquals("/\\{<[^/]+>pageID\\}/topic/\\{<[^/]+>topicID\\}", patternArg);
     assertEquals("/\\{pageID<[^/]+>\\}/topic/\\{topicID<[^/]+>\\}", patternStr);
-  }
+    
+    Pattern patternNew = Pattern.compile(patternArg);
+
+    
+    }
 
 }
